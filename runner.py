@@ -5,5 +5,6 @@ if __name__ == "__main__":
         htranData = ""
         for l in f1:
             htranData += l
-    sum = summary.summarize(htranData)
+    # summary.summarize([htranData])
+    sum = summary.summarize([htranData])
     print(sum)

@@ -1,52 +1,31 @@
 # adapated from https://medium.com/jatana/unsupervised-text-summarization-using-sentence-embeddings-adb15ce83db1
 
 import numpy as np
-# from talon.signature.bruteforce import extract_signature
-# from langdetect import detect
 from nltk.tokenize import sent_tokenize
-import skipthoughts
+from skipthoughts import skipthoughts
 from sklearn.cluster import KMeans
 from sklearn.metrics import pairwise_distances_argmin_min
 # ***************************************************************************
 
-
-# def preprocess(emails):
-#     """
-#     Performs preprocessing operations such as:
-#         1. Removing signature lines (only English emails are supported)
-#         2. Removing new line characters.
-#     """
-#     n_emails = len(emails)
-#     for i in range(n_emails):
-#         email = emails[i]
-#         email, _ = extract_signature(email)
-#         lines = email.split('\n')
-#         for j in reversed(range(len(lines))):
-#             lines[j] = lines[j].strip()
-#             if lines[j] == '':
-#                 lines.pop(j)
-#         emails[i] = ' '.join(lines)
-
-
-def split_sentences(emails):
+def split_sentences(all_para):
     """
-    Splits the emails into individual sentences
+    Splits the paragraphs into individual sentences
     """
-    n_emails = len(emails)
-    for i in range(n_emails):
-        email = emails[i]
-        sentences = sent_tokenize(email)
+    n_para = len(all_para)
+    for i in range(n_para):
+        para = all_para[i]
+        sentences = sent_tokenize(para)
         for j in reversed(range(len(sentences))):
             sent = sentences[j]
             sentences[j] = sent.strip()
             if sent == '':
                 sentences.pop(j)
-        emails[i] = sentences
+        all_para[i] = sentences
 
 
 def skipthought_encode(emails):
     """
-    Obtains sentence embeddings for each sentence in the emails
+    Obtains sentence embeddings for each sentence in the paragraph
     """
     enc_emails = [None]*len(emails)
     cum_sum_sentences = [0]
@@ -69,32 +48,33 @@ def skipthought_encode(emails):
     return enc_emails
 
 
-def summarize(emails):
+def summarize(all_para):
     """
-    Performs summarization of emails
+    Performs summarization of paragraphs
     """
-    n_emails = len(emails)
-    summary = [None]*n_emails
+    n_para = len(all_para)
+    summary = [None]*n_para
     print('Preprecesing...')
     # preprocess(emails)
     print('Splitting into sentences...')
-    split_sentences(emails)
+    split_sentences(all_para)
+    print(all_para)
     print('Starting to encode...')
-    enc_emails = skipthought_encode(emails)
+    enc_all_paras = skipthought_encode(all_para)
     print('Encoding Finished')
-    for i in range(n_emails):
-        enc_email = enc_emails[i]
-        n_clusters = int(np.ceil(len(enc_email)**0.5))
+    for i in range(n_para):
+        enc_para = enc_all_paras[i]
+        n_clusters = int(np.ceil(len(enc_para)**0.5))
         kmeans = KMeans(n_clusters=n_clusters, random_state=0)
-        kmeans = kmeans.fit(enc_email)
+        kmeans = kmeans.fit(enc_para)
         avg = []
         closest = []
         for j in range(n_clusters):
             idx = np.where(kmeans.labels_ == j)[0]
             avg.append(np.mean(idx))
         closest, _ = pairwise_distances_argmin_min(kmeans.cluster_centers_,\
-                                                   enc_email)
+                                                   enc_para)
         ordering = sorted(range(n_clusters), key=lambda k: avg[k])
-        summary[i] = ' '.join([emails[i][closest[idx]] for idx in ordering])
+        summary[i] = ' '.join([all_para[i][closest[idx]] for idx in ordering])
     print('Clustering Finished')
     return summary
