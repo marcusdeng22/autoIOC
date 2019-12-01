@@ -1,5 +1,9 @@
+# temp files and data files
 data/*
 test.html
+
+# pip env
+cleaner/*
 
 # skip-thoughts library
 skipthoughts/
