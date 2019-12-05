@@ -6,7 +6,9 @@ import sys
 from collections import OrderedDict
 from difflib import SequenceMatcher
 
+
 def clean(FILE, page_no):
+	original_page_no = page_no  # Because it changes throughout the rest of the program
 	pdf2text_proc = subprocess.Popen("which pdf2txt.py", shell=True, stdout=subprocess.PIPE)
 
 	pdf2text = pdf2text_proc.communicate()[0].strip().decode("utf-8")
@@ -31,7 +33,7 @@ def clean(FILE, page_no):
 		if not LOAD:
 			command = " ".join(['python3.6', pdf2text, '-p', str(page_no), '-t', 'html', FILE])
 			print(command)
-			print()
+			#print()
 			output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
 
 			if len(output) == 0:
@@ -231,7 +233,7 @@ def clean(FILE, page_no):
 			footerList.append(footerCount)
 		return footerList
 	#remove footers first
-	print("removing footers")
+	print("\nRemoving footers")
 	footerList = removeBorder("footer")
 	#now remove the footers
 	for f in footerList:
@@ -247,8 +249,7 @@ def clean(FILE, page_no):
 		for p in maxFooter[2]:
 			del pageText[p][-1]
 
-	print()
-	print("removing headers")
+	print("Removing headers")
 	#now do headers
 	headerList = removeBorder("header")
 	currentFirst = 0
@@ -275,10 +276,10 @@ def clean(FILE, page_no):
 		if modified:
 			currentFirst += 1
 
-	print("--------------------------------------------")
-	for p in pageText:
-		print(p)
-		print()
+	# print("--------------------------------------------")
+	# for p in pageText:
+	# 	print(p)
+	# 	print()
 
 	#parse table of contents
 	toc = []
@@ -320,7 +321,7 @@ def clean(FILE, page_no):
 			continue
 
 	print("------------------")
-	print(contents)
+	print("Contents:", *contents, sep='\n\t')
 
 
 	#merge text across pages here
@@ -335,7 +336,7 @@ def clean(FILE, page_no):
 				newSection = False
 				for title, pageRef in contents.items():
 					seqM.set_seq2(title.lower())
-					if seqM.quick_ratio() > marginAllowed and abs(num + int(sys.argv[2]) - pageRef) <= 2:	#approximately close to actual page
+					if seqM.quick_ratio() > marginAllowed and abs(num + original_page_no - pageRef) <= 2:	#approximately close to actual page
 						if len(curSection) > 0:
 							fullText.append(curSection)
 						curSection = [text]
@@ -351,19 +352,28 @@ def clean(FILE, page_no):
 	fullText.append(curSection)
 
 	print("-----------------------")
-	for section in fullText:
-		for s in section:
-			print(s)
-			print()
-		print("++++++++++++++++")
 
-	return fullText
+	out_file = FILE.split('.')  # in case the file has many . in the name
+	out_file[-2] = out_file[-2] + "_parsed-sections"
+	out_file[-1] = 'txt'
+	out_file = '.'.join(out_file)
+	print("Outputting to:", out_file, '\n')
+	with open(out_file, 'w') as f:
+		for section in fullText:
+			for s in section:
+				f.write(s)
+				f.write('\n')
+			f.write("++++++++++++++++\n")
+
+	#return fullText
+
 
 if __name__ == "__main__":
 	if len(sys.argv) != 3:
 		print("usage: python3.6 textcleaner.py <file> <page for table of contents>")
 		print("table of contents is assumed to be 1 page only")
 		exit()
+	
 	FILE = sys.argv[1]
 	page_no = int(sys.argv[2])#10#3
 	clean(FILE, page_no)
