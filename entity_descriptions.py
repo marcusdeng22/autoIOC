@@ -88,7 +88,7 @@ def main():
             counts = []
             for section in cleaned_text:
                 count = 0
-                for chunk in section:
+                for chunk in section[1:]:
                     for word in chunk.split(' '):
                         if word == selection:
                             count += 1
@@ -100,6 +100,24 @@ def main():
 
 
             # Break cleaned_text into individual sentences
+            nlp = English()
+            nlp.add_pipe(nlp.create_pipe('sentencizer')) # updated
+            sentences = []
+            for section in cleaned_text:
+                count = 0
+                for chunk in section[1:]:
+                    doc = nlp(chunk)
+                    chunk_sentences = [sent.string.strip() for sent in doc.sents]
+                    # for sentence in chunk_sentences:
+                    #     print(sentence)
+                    #     print()
+                    sentences.extend(chunk_sentences)
+            
+            for sentence in sentences:
+                print(sentence, end='\n\n')
+
+
+
 
 
             # containing_sentences = []
