@@ -353,17 +353,17 @@ def clean(FILE, page_no):
 
 	print("-----------------------")
 
-	out_file = FILE.split('.')  # in case the file has many . in the name
-	out_file[-2] = out_file[-2] + "_parsed-sections"
-	out_file[-1] = 'txt'
-	out_file = '.'.join(out_file)
-	print("Outputting to:", out_file, '\n')
-	with open(out_file, 'w') as f:
-		for section in fullText:
-			for s in section:
-				f.write(s)
-				f.write('\n')
-			f.write("++++++++++++++++\n")
+	# out_file = FILE.split('.')  # in case the file has many . in the name
+	# out_file[-2] = out_file[-2] + "_parsed-sections"
+	# out_file[-1] = 'txt'
+	# out_file = '.'.join(out_file)
+	# print("Outputting to:", out_file, '\n')
+	# with open(out_file, 'w') as f:
+	# 	for section in fullText:
+	# 		for s in section:
+	# 			f.write(s)
+	# 			f.write('\n')
+	# 		f.write("++++++++++++++++\n")
 
 	return fullText
 
