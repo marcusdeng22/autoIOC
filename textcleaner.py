@@ -365,7 +365,7 @@ def clean(FILE, page_no):
 				f.write('\n')
 			f.write("++++++++++++++++\n")
 
-	#return fullText
+	return fullText
 
 
 if __name__ == "__main__":
