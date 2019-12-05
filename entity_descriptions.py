@@ -1,6 +1,8 @@
 
 import os
-import subprocess
+
+import spacy
+from collections import Counter
 
 from textcleaner import clean
 
@@ -19,7 +21,8 @@ def main():
     for file in os.listdir("data"):
         if file.endswith(".pdf"):
             file_path = os.path.join("data", file)
-            print(file)
+            file_path = os.path.join("data", "Damballa_Report_IMDDOS.pdf")
+            print(file_path)
 
             #clean(file_path, 2)
 
@@ -28,10 +31,32 @@ def main():
             cleaned_file_path[-1] = 'txt'
             cleaned_file_path = '.'.join(cleaned_file_path)
             print("Opening", cleaned_file_path)
-            #with open(cleaned_file_path, 'r') as f:
+            with open(cleaned_file_path, 'r') as f:
+                cleaned_text = f.read()
                 
+                ### Run NER on the cleaned text, get most commonly mentioned named entities ###
+                
+                nlp = spacy.load("en_core_web_sm")
+                # Need to run command in terminal:
+                #   python -m spacy download en_core_web_sm
+                
+                doc = nlp(cleaned_text)
+                # for ent in doc.ents[:10]:
+                #     print(ent.text, ent.label_)
+                
+                # ents = [(x.text, x.label_) for x in doc.ents]
+                # print(*Counter(ents).most_common()[:20], sep='\n')
 
-            #break
+                print("Named entities as recognized by Spacy NER model, with most commonly mentioned at top")
+                ents = [x.text for x in doc.ents if not x.text.isnumeric() and x.label_ is not "DATE"]
+
+                most_common = Counter(ents).most_common()[:20]
+                #print(*most_common[:20], sep='\n')
+                
+                for idx, ent in enumerate(most_common):
+                    print('{:<5} {}({})'.format(str(idx+1)+'.', ent[0], ent[1]), sep='\n')
+                
+            break
 
 
 if __name__ == '__main__':
