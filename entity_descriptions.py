@@ -27,11 +27,15 @@ def main():
 
             cleaned_text = clean(file_path, 2)
             
+            # Get rid of sentences that start with "Figure"
             for section in cleaned_text:
                 for idx, sentence in enumerate(section):
                     if sentence.startswith("Figure"):
                         del section[idx]
             # For some reason gets some, but not all???
+
+            # Get rid of summary section, because it has a bunch of random crap after it
+            del cleaned_text[-1]
 
             # for section in full_text:
             #     for sentence in section:
@@ -55,7 +59,7 @@ def main():
             block_of_text = ''
             for section in cleaned_text:
                 #print(section, end='\n\n\n')
-                block_of_text += ' '.join(section[1:-1])
+                block_of_text += ' '.join(section[1:])  # Ignoring section header
             #print(block_of_text)
 
             doc = nlp(block_of_text)
@@ -80,28 +84,23 @@ def main():
             print(selection)
 
 
+            ### Look for selected entity in each section
+            counts = []
+            for section in cleaned_text:
+                count = 0
+                for chunk in section:
+                    for word in chunk.split(' '):
+                        if word == selection:
+                            count += 1
+                counts.append(count)
+            print(counts, "sum:", sum(counts))
 
-            # ### Look for selected entity in each section
-            # sections = cleaned_text.split('++++++++++++++++')[:-2]
-            #     # Excluding summary, plus a random thing at the end.
-            # counts = []
-            # for section in sections:
-            #     count = 0
-            #     for word in section.split(' '):
-            #         if word == selection:
-            #             count += 1
-            #     counts.append(count)
-            # print(counts, "sum:", sum(counts))
+            # So, turns out that not every instance of an entity in the text is
+            # recognized as an entity. Is this good or bad?
 
-            # # So, turns out that not every instance of an entity in the text is
-            # # recognized as an entity. Is this good or bad?
 
-            # # text summarization over each sentence containing the entity.
-            # nlp = English()
-            # nlp.add_pipe(nlp.create_pipe('sentencizer')) # updated
-            # doc = nlp(cleaned_text)
-            # sentences = [sent.string.strip() for sent in doc.sents]
-            # #print(*sentences[:30], sep='\n\n')
+            # Break cleaned_text into individual sentences
+
 
             # containing_sentences = []
             # for sentence in sentences:
@@ -110,6 +109,7 @@ def main():
             #     if selection in entities:
             #         # could just look for the work, but trying to recognize it
             #         # as an entity again.
+            #         pass
 
             break
 
