@@ -85,23 +85,24 @@ def main():
             print(selection)
 
 
-            ### Look for selected entity in each section
-            counts = []
-            for section in cleaned_text:
-                count = 0
-                for chunk in section[1:]:
-                    for word in chunk.split(' '):
-                        if word == selection:
-                            count += 1
-                counts.append(count)
-            print(counts, "sum:", sum(counts))
-            # Not good to split on spaces, since an entity may consist of multiple words
+            # ### Look for selected entity in each section
+            # counts = []
+            # for section in cleaned_text:
+            #     count = 0
+            #     for chunk in section[1:]:
+            #         for word in chunk.split(' '):
+            #             if word == selection:
+            #                 count += 1
+            #     counts.append(count)
+            # print(counts, "sum:", sum(counts))
+            # # Not good to split on spaces, since an entity may consist of multiple words
 
-            # So, turns out that not every instance of an entity in the text is
-            # recognized as an entity. Is this good or bad?
+            # # So, turns out that not every instance of an entity in the text is
+            # # recognized as an entity. Is this good or bad?
 
 
             # Break cleaned_text into individual sentences
+            # Select sentences that contain the entity we are looking for.
             nlp = English()
             nlp.add_pipe(nlp.create_pipe('sentencizer')) # updated
             containing_sentences = []
