@@ -7,12 +7,12 @@ from collections import OrderedDict
 from difflib import SequenceMatcher
 
 
-def clean(FILE, page_no):
+def clean(FILE, page_no, print_to_stdout=True):
 	original_page_no = page_no  # Because it changes throughout the rest of the program
 	pdf2text_proc = subprocess.Popen("which pdf2txt.py", shell=True, stdout=subprocess.PIPE)
 
 	pdf2text = pdf2text_proc.communicate()[0].strip().decode("utf-8")
-	print("location of pdf2txt:", pdf2text)
+	# print("location of pdf2txt:", pdf2text)
 
 	LOAD = False	#debugging purposes
 
@@ -32,7 +32,7 @@ def clean(FILE, page_no):
 	while True:
 		if not LOAD:
 			command = " ".join(['python3.6', pdf2text, '-p', str(page_no), '-t', 'html', FILE])
-			print(command)
+			# print(command)
 			#print()
 			output = subprocess.Popen(command, shell=True, stdout=subprocess.PIPE).communicate()[0].decode("utf-8")
 
@@ -233,7 +233,7 @@ def clean(FILE, page_no):
 			footerList.append(footerCount)
 		return footerList
 	#remove footers first
-	print("\nRemoving footers")
+	# print("\nRemoving footers")
 	footerList = removeBorder("footer")
 	#now remove the footers
 	for f in footerList:
@@ -244,12 +244,12 @@ def clean(FILE, page_no):
 			if v[0] > count:
 				count = v[0]
 				maxFooter = v
-		print(maxFooter)
-		print()
+		# print(maxFooter)
+		# print()
 		for p in maxFooter[2]:
 			del pageText[p][-1]
 
-	print("Removing headers")
+	# print("Removing headers")
 	#now do headers
 	headerList = removeBorder("header")
 	currentFirst = 0
@@ -261,8 +261,8 @@ def clean(FILE, page_no):
 			if v[0] > count:
 				count = v[0]
 				maxHeader = v
-		print(maxHeader)
-		print()
+		# print(maxHeader)
+		# print()
 		modified = False
 		for p in maxHeader[2]:
 			if len(maxHeader) == 3:
@@ -320,8 +320,8 @@ def clean(FILE, page_no):
 		else:
 			continue
 
-	print("------------------")
-	print("Contents:", *contents, sep='\n\t')
+	# print("------------------")
+	# print("Contents:", *contents, sep='\n\t')
 
 
 	#merge text across pages here
@@ -351,7 +351,7 @@ def clean(FILE, page_no):
 						curStyle = style
 	fullText.append(curSection)
 
-	print("-----------------------")
+	#print("-----------------------")
 
 	# out_file = FILE.split('.')  # in case the file has many . in the name
 	# out_file[-2] = out_file[-2] + "_parsed-sections"
@@ -359,13 +359,14 @@ def clean(FILE, page_no):
 	# out_file = '.'.join(out_file)
 	# print("Outputting to:", out_file, '\n')
 	# with open(out_file, 'w') as f:
-	# 	for section in fullText:
-	# 		for s in section:
-	# 			f.write(s)
-	# 			f.write('\n')
-	# 		f.write("++++++++++++++++\n")
-
-	return fullText
+	if print_to_stdout:
+		for section in fullText:
+			for s in section:
+				print(s)
+				print()
+			print("++++++++++++++++")
+	else:
+		return fullText
 
 
 if __name__ == "__main__":

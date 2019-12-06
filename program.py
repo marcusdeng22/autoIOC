@@ -1,18 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import spacy
+from spacy.lang.en import English
 from collections import Counter
 import en_core_web_sm
 from datetime import datetime
 import sys
 import uuid
 import json
+import subprocess
 
 from textcleaner import clean
 from entity_descriptions import get_descriptions
 
 
-def stuff_that_happens(FILE):
+def stuff_that_happens(FILE,FILE2):
     default_spacy_tagger = en_core_web_sm.load()
     custom_spacy_tagger = spacy.load('damballa_train')
     
@@ -38,12 +40,16 @@ def stuff_that_happens(FILE):
                   }
     sdo_list.append(report_sdo)
 
+    print("Please wait one moment. Text cleaning in process.")
+    cmd = "python textcleaner.py " + FILE2 + ' 2 > ' + FILE
+    subprocess.Popen(cmd, shell=True)
+
 
     # Open and read the cleaned text file of the desired pdf report
     with open(FILE, 'r') as report_reader:
         report_contents = report_reader.read()
 
-    cleaned_text = clean(FILE, 2)
+    cleaned_text = clean(FILE2, 2, False)
     # Get rid of sentences that start with "Figure"
     for section in cleaned_text:
         for idx, sentence in enumerate(section):
@@ -53,22 +59,10 @@ def stuff_that_happens(FILE):
     # Get rid of summary section, because it has a bunch of random crap after it
     del cleaned_text[-1]
 
-    block_of_text = ''
-    for section in cleaned_text:
-        #print(section, end='\n\n\n')
-        for chunk in section[1:]:
-            block_of_text += chunk + '\n'  # Ignoring section header
-
-    # with open('temporary_text.txt', 'w') as fuckyou:
-    #     fuckyou.write(block_of_text)
-    # fuckyou.close()
-
-    # with open('temporary_text.txt', 'r') as fuckme:
-    #     block_of_text = fuckme.read()
     
     # Run the report contents through spacy's nlp process using the default and custom models
     #default_parsing = default_spacy_tagger(block_of_text)
-    custom_parsing = custom_spacy_tagger(block_of_text)
+    custom_parsing = custom_spacy_tagger(report_contents)
     
     # Create lists containing the entities and corresponding labels identified by each model
     #default_entities = [(entity.text, entity.label_) for entity in default_parsing.ents]
@@ -212,8 +206,9 @@ def stuff_that_happens(FILE):
     
 
 if __name__ == '__main__':
-    if len(sys.argv) != 3:
-        print("usage: python running_test.py -r <textfile>")
+    if len(sys.argv) != 4:
+        print("usage: python running_test.py -r <textfile> <pdffile>")
         exit()
     FILE = sys.argv[2]
-    stuff_that_happens(FILE)
+    FILE2 = sys.argv[3]
+    stuff_that_happens(FILE,FILE2)
