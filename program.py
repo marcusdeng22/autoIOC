@@ -13,17 +13,17 @@ custom_spacy_tagger = spacy.load('damballa_train')
 
 def stuff_that_happens(FILE):
     
-    # Make a bundle later
+    # STIX Bundle to hold SDOs
     sdo_bundle = {"type": 'bundle',
               "id": 'bundle--'+str(uuid.uuid5(uuid.NAMESPACE_DNS,FILE)),
               "spec_version": "2.0",
               "objects": []
               }
-    # List to hold all created sdo
+    
+    # List to hold all created STIX Domain Objects (SDOs)
     sdo_list = []
     
-    # Initial creation of the report_sdo
-    # Figure out how to fill in the description and published categories
+    # Initial creation SDO for the report itself.
     report_sdo = {"type": 'report', 
                   "id": 'report--'+str(uuid.uuid5(uuid.NAMESPACE_DNS, FILE[0:-4])),
                   "created": str(datetime.now()), 
@@ -48,9 +48,6 @@ def stuff_that_happens(FILE):
     custom_entities = [(entity.text, entity.label_) for entity in custom_parsing.ents]
     
     
-    # Potential place for Bradley's section
-    
-    
     # Entity identification frequencies throughout the document if needed
     #default_entity_frequency = Counter(default_entities)
     custom_entity_frequency = Counter(custom_entities)
@@ -72,6 +69,7 @@ def stuff_that_happens(FILE):
         creation_sdo["id"] = creation_sdo["type"]+str(uuid.uuid5(uuid.NAMESPACE_DNS,most_common[custom_entity_index][0][0]))
         creation_sdo["created"] = str(datetime.now())
         creation_sdo["modified"] = str(datetime.now())
+        creation_sdo["name"] = most_common[custom_entity_index][0][0]
         creation_sdo["description"] = ''
         creation_sdo["labels"] = []
         sdo_list.append(creation_sdo)
@@ -79,13 +77,15 @@ def stuff_that_happens(FILE):
         custom_entity_index += 1
 
 
-    
     # Potential place for Bradley's section
-        
+    
+    
 
 
 
-    # User interaction loop that allows creation of custom sdos
+    
+
+     # User interaction loop that allows creation of custom sdos
     print()
     user_interaction_complete = False
     first_prompt = True
