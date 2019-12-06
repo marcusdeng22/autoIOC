@@ -6,6 +6,7 @@ import spacy
 from spacy.lang.en import English
 
 from textcleaner import clean
+from text_summarizer import generate_summary
 
 # We can use Spacy NER to get named entities
 # We can separate the document into sections based on the table of contents
@@ -133,7 +134,9 @@ def main():
             print("Containing sentences:")
             for sentence in containing_sentences:
                 print(sentence, end='\n\n')
-
+            
+            summary_sentences = generate_summary(containing_sentences)
+            
             break
 
 
