@@ -1,17 +1,20 @@
 # -*- coding: utf-8 -*-
 
 import spacy
-from spacy import displacy
 from collections import Counter
 import en_core_web_sm
 from datetime import datetime
 import sys
 import uuid
 import json
-default_spacy_tagger = en_core_web_sm.load()
-custom_spacy_tagger = spacy.load('damballa_train')
+
+from textcleaner import clean
+from entity_descriptions import get_descriptions
+
 
 def stuff_that_happens(FILE):
+    default_spacy_tagger = en_core_web_sm.load()
+    custom_spacy_tagger = spacy.load('damballa_train')
     
     # STIX Bundle to hold SDOs
     sdo_bundle = {"type": 'bundle',
@@ -34,19 +37,42 @@ def stuff_that_happens(FILE):
                   "object_refs": [],
                   }
     sdo_list.append(report_sdo)
-    
+
+
     # Open and read the cleaned text file of the desired pdf report
     with open(FILE, 'r') as report_reader:
         report_contents = report_reader.read()
+
+    cleaned_text = clean(FILE, 2)
+    # Get rid of sentences that start with "Figure"
+    for section in cleaned_text:
+        for idx, sentence in enumerate(section):
+            if sentence.startswith("Figure"):
+                del section[idx]
+    # For some reason gets some, but not all???
+    # Get rid of summary section, because it has a bunch of random crap after it
+    del cleaned_text[-1]
+
+    block_of_text = ''
+    for section in cleaned_text:
+        #print(section, end='\n\n\n')
+        for chunk in section[1:]:
+            block_of_text += chunk + '\n'  # Ignoring section header
+
+    # with open('temporary_text.txt', 'w') as fuckyou:
+    #     fuckyou.write(block_of_text)
+    # fuckyou.close()
+
+    # with open('temporary_text.txt', 'r') as fuckme:
+    #     block_of_text = fuckme.read()
     
     # Run the report contents through spacy's nlp process using the default and custom models
-    default_parsing = default_spacy_tagger(report_contents)
-    custom_parsing = custom_spacy_tagger(report_contents)
+    #default_parsing = default_spacy_tagger(block_of_text)
+    custom_parsing = custom_spacy_tagger(block_of_text)
     
     # Create lists containing the entities and corresponding labels identified by each model
     #default_entities = [(entity.text, entity.label_) for entity in default_parsing.ents]
     custom_entities = [(entity.text, entity.label_) for entity in custom_parsing.ents]
-    
     
     # Entity identification frequencies throughout the document if needed
     #default_entity_frequency = Counter(default_entities)
@@ -64,22 +90,21 @@ def stuff_that_happens(FILE):
         print(f'[{custom_entity_index}] {most_common[custom_entity_index][0]}: {most_common[custom_entity_index][1]}')
         
         # Create sdos for each identified entity determined by the custom language model
-        """
-        creation_sdo = {}
-        creation_sdo["type"] = most_common[custom_entity_index][0][1].lower()
-        creation_sdo["id"] = creation_sdo["type"]+str(uuid.uuid5(uuid.NAMESPACE_DNS,most_common[custom_entity_index][0][0]))
-        creation_sdo["created"] = str(datetime.now())
-        creation_sdo["modified"] = str(datetime.now())
-        creation_sdo["name"] = most_common[custom_entity_index][0][0]
-        creation_sdo["description"] = ''
-        creation_sdo["labels"] = []
-        sdo_list.append(creation_sdo)
-        """
+        
+        # creation_sdo = {}
+        # creation_sdo["type"] = most_common[custom_entity_index][0][1].lower()
+        # creation_sdo["id"] = creation_sdo["type"]+str(uuid.uuid5(uuid.NAMESPACE_DNS,most_common[custom_entity_index][0][0]))
+        # creation_sdo["created"] = str(datetime.now())
+        # creation_sdo["modified"] = str(datetime.now())
+        # creation_sdo["name"] = most_common[custom_entity_index][0][0]
+        # creation_sdo["description"] = ''
+        # creation_sdo["labels"] = []
+        # sdo_list.append(creation_sdo)
+        
         custom_entity_index += 1
 
 
     # Potential place for Bradley's section
-
     
 
 
@@ -111,6 +136,7 @@ def stuff_that_happens(FILE):
         # Create custom malware/threat-actor sdos
         if user_input[0:6] == 'create':
             tokenised_input = user_input.split(';')
+    
             temp_sdo = {}
             if user_input[7:10] == 'sdo':
                 print("FUCK YOU")
@@ -119,7 +145,7 @@ def stuff_that_happens(FILE):
                 temp_sdo["created"] = str(datetime.now())
                 temp_sdo["modified"] = str(datetime.now())
                 temp_sdo["name"] = most_common[int(tokenised_input[1])][0][0]
-                temp_sdo["description"] = ''
+                temp_sdo["description"] = get_descriptions(cleaned_text, temp_sdo["name"])
                 temp_sdo["labels"] = []
             else:
                 if user_input[7:14] == 'malware':
