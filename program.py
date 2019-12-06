@@ -64,6 +64,7 @@ def stuff_that_happens(FILE):
         print(f'[{custom_entity_index}] {most_common[custom_entity_index][0]}: {most_common[custom_entity_index][1]}')
         
         # Create sdos for each identified entity determined by the custom language model
+        """
         creation_sdo = {}
         creation_sdo["type"] = most_common[custom_entity_index][0][1].lower()
         creation_sdo["id"] = creation_sdo["type"]+str(uuid.uuid5(uuid.NAMESPACE_DNS,most_common[custom_entity_index][0][0]))
@@ -73,12 +74,12 @@ def stuff_that_happens(FILE):
         creation_sdo["description"] = ''
         creation_sdo["labels"] = []
         sdo_list.append(creation_sdo)
-        
+        """
         custom_entity_index += 1
 
 
     # Potential place for Bradley's section
-    
+
     
 
 
@@ -99,6 +100,7 @@ def stuff_that_happens(FILE):
         # Help command
         if user_input == 'help':
             print('Available commands are: create malware ;<malware name> ;<malware description>')
+            print('                      : create sdo ;<entity index>')
             print('                      : create threat-actor <threat-actor name> <threat-actor description>')
             print('                      : sdo_list (prints the currently created sdos)')
             print('                      : sdo_drop <sdo index> (drops the sdo from the sdo list)')
@@ -108,18 +110,28 @@ def stuff_that_happens(FILE):
         
         # Create custom malware/threat-actor sdos
         if user_input[0:6] == 'create':
-            temp_sdo = {}
             tokenised_input = user_input.split(';')
-            if user_input[7:14] == 'malware':
-                temp_sdo["type"] = "malware"
-            if user_input[7:19] == 'threat-actor':
-                temp_sdo["type"] = 'threat-actor'
-            temp_sdo["id"] = 'malware--'+str(uuid.uuid5(uuid.NAMESPACE_DNS, tokenised_input[1]))
-            temp_sdo["created"] = str(datetime.now())
-            temp_sdo["modified"] = str(datetime.now())
-            temp_sdo["name"] = tokenised_input[1]
-            temp_sdo["description"] = tokenised_input[2]
-            temp_sdo["labels"] = []
+            temp_sdo = {}
+            if user_input[7:10] == 'sdo':
+                print("FUCK YOU")
+                temp_sdo["type"] = most_common[int(tokenised_input[1])][0][1].lower()
+                temp_sdo["id"] = temp_sdo["type"]+str(uuid.uuid5(uuid.NAMESPACE_DNS,most_common[int(tokenised_input[1])][0][0]))
+                temp_sdo["created"] = str(datetime.now())
+                temp_sdo["modified"] = str(datetime.now())
+                temp_sdo["name"] = most_common[int(tokenised_input[1])][0][0]
+                temp_sdo["description"] = ''
+                temp_sdo["labels"] = []
+            else:
+                if user_input[7:14] == 'malware':
+                    temp_sdo["type"] = "malware"
+                if user_input[7:19] == 'threat-actor':
+                    temp_sdo["type"] = 'threat-actor'
+                temp_sdo["id"] = 'malware--'+str(uuid.uuid5(uuid.NAMESPACE_DNS, tokenised_input[1]))
+                temp_sdo["created"] = str(datetime.now())
+                temp_sdo["modified"] = str(datetime.now())
+                temp_sdo["name"] = tokenised_input[1]
+                temp_sdo["description"] = tokenised_input[2]
+                temp_sdo["labels"] = []
             sdo_list.append(temp_sdo)
             
         # Print out all the currently created sdos
