@@ -79,7 +79,7 @@ def main():
                 print('{:<5} {}({})'.format(str(idx+1)+'.', ent[0], ent[1]), sep='\n')
             
             #selections = [1, 3]
-            selection = 3#int(input("Select entity to summarize: "))
+            selection = 2#int(input("Select entity to summarize: "))
             selection = most_common[selection-1][0]
             print(selection)
 
@@ -94,6 +94,7 @@ def main():
                             count += 1
                 counts.append(count)
             print(counts, "sum:", sum(counts))
+            # Not good to split on spaces, since an entity may consist of multiple words
 
             # So, turns out that not every instance of an entity in the text is
             # recognized as an entity. Is this good or bad?
@@ -102,32 +103,36 @@ def main():
             # Break cleaned_text into individual sentences
             nlp = English()
             nlp.add_pipe(nlp.create_pipe('sentencizer')) # updated
+            containing_sentences = []
             sentences = []
             for section in cleaned_text:
                 count = 0
                 for chunk in section[1:]:
                     doc = nlp(chunk)
                     chunk_sentences = [sent.string.strip() for sent in doc.sents]
-                    # for sentence in chunk_sentences:
-                    #     print(sentence)
-                    #     print()
                     sentences.extend(chunk_sentences)
+                    for sentence in chunk_sentences:
+                        if selection in sentence:
+                            containing_sentences.append(sentence)
+
             
-            for sentence in sentences:
-                print(sentence, end='\n\n')
-
-
-
-
-
+            # ## NEVERMIND, literally missed IMDDOS in a sentence. Harrumph.
+            # nlp = spacy.load("en_core_web_sm")
             # containing_sentences = []
             # for sentence in sentences:
             #     doc = nlp(sentence)
-            #     entities = [x.label for x in doc.ents]
+            #     entities = [x.text for x in doc.ents]
+            #     print("Sentence:", sentence)
+            #     print("Entities:", entities)
+            #     print()
             #     if selection in entities:
-            #         # could just look for the work, but trying to recognize it
+            #         # could just look for the word, but trying to recognize it
             #         # as an entity again.
-            #         pass
+            #         containing_sentences.append(sentence)
+
+            print("Containing sentences:")
+            for sentence in containing_sentences:
+                print(sentence, end='\n\n')
 
             break
 
