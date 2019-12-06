@@ -5,6 +5,7 @@ from nltk.corpus import stopwords
 from nltk.cluster.util import cosine_distance
 import numpy as np
 import networkx as nx
+from copy import deepcopy
 
 def process_sentences(sentences):
     processed_sentences = []
@@ -56,6 +57,10 @@ def build_similarity_matrix(sentences, stop_words):
 
 
 def generate_summary(sentences, top_n=5):
+    sentences_copy = deepcopy(sentences)
+    if len(sentences) < top_n:
+        top_n = len(sentences)-1
+
     stop_words = stopwords.words('english')
     summarize_text = []
 
@@ -79,6 +84,9 @@ def generate_summary(sentences, top_n=5):
     # Step 5 - Output the summarized text
     # print("Summarize Text: \n", ". ".join(summarize_text))
 
+
+    if len(summarize_text) == 0:
+        return ". ".join(sentences_copy)
     return ". ".join(summarize_text)
 
  

@@ -126,14 +126,14 @@ def stuff_that_happens(FILE,FILE2):
             print('                      : sdo_edit ;<sdo index>; <sdo key>; <new value> (edits the key-value pair of the sdo at index)')
             print('                      : save (saves the current sdo_list into a .json file)')
             print('                      : complete (exits the user interaction loop and stops the program)')
-        
+            print('                      : entities (prints entity list)')        
+
         # Create custom malware/threat-actor sdos
         if user_input[0:6] == 'create':
             tokenised_input = user_input.split(';')
     
             temp_sdo = {}
             if user_input[7:10] == 'sdo':
-                print("FUCK YOU")
                 temp_sdo["type"] = most_common[int(tokenised_input[1])][0][1].lower()
                 temp_sdo["id"] = temp_sdo["type"]+str(uuid.uuid5(uuid.NAMESPACE_DNS,most_common[int(tokenised_input[1])][0][0]))
                 temp_sdo["created"] = str(datetime.now())
@@ -141,6 +141,7 @@ def stuff_that_happens(FILE,FILE2):
                 temp_sdo["name"] = most_common[int(tokenised_input[1])][0][0]
                 temp_sdo["description"] = get_descriptions(cleaned_text, temp_sdo["name"])
                 temp_sdo["labels"] = []
+                print(f'SDO created for entity number {tokenised_input[1]}')
             else:
                 if user_input[7:14] == 'malware':
                     temp_sdo["type"] = "malware"
@@ -152,8 +153,10 @@ def stuff_that_happens(FILE,FILE2):
                 temp_sdo["name"] = tokenised_input[1]
                 temp_sdo["description"] = tokenised_input[2]
                 temp_sdo["labels"] = []
+                print(f'{temp_sdo["type"]} SDO created for {temp_sdo["name"]}')
             sdo_list.append(temp_sdo)
             
+
         # Print out all the currently created sdos
         if user_input == 'sdo_list':
             sdo_index = 0
@@ -198,6 +201,13 @@ def stuff_that_happens(FILE,FILE2):
             save_file.close()
             print(f"Bundle saved to {filename}")
         
+        # Print the entity list
+        if user_input == 'entities':
+            custom_entity_index = 0
+            for entity in custom_entity_frequency:
+                print(f'[{custom_entity_index}] {most_common[custom_entity_index][0]}: {most_common[custom_entity_index][1]}')
+                custom_entity_index += 1
+
         # End user interaction loop
         if user_input == 'complete':
             print('Exiting the user input loop')

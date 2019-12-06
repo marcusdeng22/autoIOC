@@ -24,7 +24,7 @@ def get_descriptions(cleaned_text, chosen_entity):
         if file.endswith(".pdf"):
             file_path = os.path.join("data", file)
             file_path = os.path.join("data", "Damballa_Report_IMDDOS.pdf")
-            print(file_path)
+            #print(file_path)
 
 
             # ### Look for selected entity in each section
